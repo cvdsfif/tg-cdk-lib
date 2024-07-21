@@ -1,17 +1,24 @@
-// import * as cdk from 'aws-cdk-lib';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as TgCdkLib from '../lib/tg-cdk-lib-stack';
+import { App } from "aws-cdk-lib"
+import { TgCdkLibStack } from "../lib/tg-cdk-lib-stack"
+import { Match, Template } from "aws-cdk-lib/assertions"
+import { } from "cdk-typescript-lib";
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/tg-cdk-lib-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new TgCdkLib.TgCdkLibStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+test('Should create the stack', () => {
+    // GIVEN a CDK app
+    const app = new App()
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
-});
+    // WHEN creating the test stack
+    const stack = new TgCdkLibStack(app, 'MyTestStack');
+    const template = Template.fromStack(stack);
+
+    // THEN there is a Secret to hold our Telegram bot token
+    template.hasResourceProperties('AWS::SecretsManager::Secret', {
+        Description: Match.stringLikeRegexp("Telegraf")
+    })
+
+    // AND we have a lambda function created to proceed as a Telegram bot handler
+    template.hasResourceProperties('AWS::Lambda::Function', {
+        Description: Match.stringLikeRegexp("proceedHandler")
+    })
+
+})
